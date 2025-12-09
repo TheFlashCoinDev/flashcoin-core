@@ -1,21 +1,28 @@
-# Patterns that are specific to a text editor, IDE, operating system, or user
-# environment are not added here. They should be added to your local gitignore
-# file instead:
-# https://docs.github.com/en/get-started/git-basics/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer
+# ─────────────────────────────────────────────
+# FlashCoin .gitignore
+# Basado en Bitcoin Core + extras para Windows/IDE
+# ─────────────────────────────────────────────
 
-# Build subdirectories.
+# Patterns that are specific to a text editor, IDE, operating system, or user
+# environment are not added here in upstream Bitcoin Core.
+# Aquí sí añadimos algunos para tu entorno en FlashCoin.
+
+# ─────────────────────────────────────────────
+# Build subdirectories
+# ─────────────────────────────────────────────
+
 /*build*
 !/build-aux
 !/build_msvc
 
-*.pyc
-
-# Only ignore unexpected patches
-*.patch
-!contrib/guix/patches/*.patch
-!depends/patches/**/*.patch
-
+# CMake
 /CMakeUserPresets.json
+/CMakeCache.txt
+/CMakeFiles/
+/cmake-build-*/
+
+# out: instaladores / binarios generados
+/out/
 
 # Previous releases
 /releases
@@ -23,6 +30,114 @@
 # cargo default target dir
 target/
 
+# guix
 /guix-build-*
-
 /ci/scratch/
+
+# ─────────────────────────────────────────────
+# Archivos Python
+# ─────────────────────────────────────────────
+*.pyc
+
+# Only ignore unexpected patches
+*.patch
+!contrib/guix/patches/*.patch
+!depends/patches/**/*.patch
+
+# ─────────────────────────────────────────────
+# IDEs / Editors
+# ─────────────────────────────────────────────
+
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# QtCreator (por si acaso)
+/.qtc_clangd/
+/.qtcreator/
+/CMakeLists.txt.user
+
+# ─────────────────────────────────────────────
+# Archivos de build (Windows / MSVC / Qt)
+# ─────────────────────────────────────────────
+
+# Típicos de MSVC
+*.obj
+*.pch
+*.pdb
+*.idb
+*.ipdb
+*.iobj
+*.ilk
+*.log
+*.tlog
+*.lastbuildstate
+*.cachefile
+*.db
+*.opendb
+
+# Carpetas típicas de configuración
+/Debug/
+/Release/
+/RelWithDebInfo/
+/MinSizeRel/
+/x64/
+/x86/
+
+# Binarios generados (no subirlos al repo)
+*.exe
+*.dll
+*.lib
+*.exp
+*.manifest
+
+# Qt moc / uic / rcc generados
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+# ─────────────────────────────────────────────
+# Archivos temporales / del sistema
+# ─────────────────────────────────────────────
+
+# General
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ─────────────────────────────────────────────
+# Logs / reports
+# ─────────────────────────────────────────────
+
+*.log
+*.orig
+*.rej
+
+# Core dumps / debug
+core
+*.dmp
+
+# ─────────────────────────────────────────────
+# Otros (si más adelante usas algo, se agrega aquí)
+# ─────────────────────────────────────────────
+
+

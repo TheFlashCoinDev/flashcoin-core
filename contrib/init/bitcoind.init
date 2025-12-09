@@ -1,36 +1,36 @@
 #!/usr/bin/env bash
 #
-#  bitcoind The bitcoin core server.
+#  FlashCoind The FlashCoin server.
 #
 #
 # chkconfig: 345 80 20
-# description: bitcoind
-# processname: bitcoind
+# description: FlashCoind
+# processname: FlashCoind
 #
 
 # Source function library.
 . /etc/init.d/functions
 
-# you can override defaults in /etc/sysconfig/bitcoind, see below
-if [ -f /etc/sysconfig/bitcoind ]; then
-        . /etc/sysconfig/bitcoind
+# you can override defaults in /etc/sysconfig/FlashCoind, see below
+if [ -f /etc/sysconfig/FlashCoind ]; then
+        . /etc/sysconfig/FlashCoind
 fi
 
 RETVAL=0
 
-prog=bitcoind
-# you can override the lockfile via BITCOIND_LOCKFILE in /etc/sysconfig/bitcoind
-lockfile=${BITCOIND_LOCKFILE-/var/lock/subsys/bitcoind}
+prog=FlashCoind
+# you can override the lockfile via FlashCoinD_LOCKFILE in /etc/sysconfig/FlashCoind
+lockfile=${FlashCoinD_LOCKFILE-/var/lock/subsys/FlashCoind}
 
-# bitcoind defaults to /usr/bin/bitcoind, override with BITCOIND_BIN
-bitcoind=${BITCOIND_BIN-/usr/bin/bitcoind}
+# FlashCoind defaults to /usr/bin/FlashCoind, override with FlashCoinD_BIN
+FlashCoind=${FlashCoinD_BIN-/usr/bin/FlashCoind}
 
-# bitcoind opts default to -disablewallet, override with BITCOIND_OPTS
-bitcoind_opts=${BITCOIND_OPTS--disablewallet}
+# FlashCoind opts default to -disablewallet, override with FlashCoinD_OPTS
+FlashCoind_opts=${FlashCoinD_OPTS--disablewallet}
 
 start() {
     echo -n $"Starting $prog: "
-    daemon $DAEMONOPTS $bitcoind $bitcoind_opts
+    daemon $DAEMONOPTS $FlashCoind $FlashCoind_opts
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch $lockfile

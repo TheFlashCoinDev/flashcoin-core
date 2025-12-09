@@ -1,9 +1,9 @@
-// Copyright (c) 2024-present The Bitcoin Core developers
+// Copyright (c) 2024-present The FlashCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or https://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_MUSIG_H
-#define BITCOIN_MUSIG_H
+#ifndef FlashCoin_MUSIG_H
+#define FlashCoin_MUSIG_H
 
 #include <pubkey.h>
 
@@ -28,4 +28,4 @@ std::optional<CPubKey> GetCPubKeyFromMuSig2KeyAggCache(secp256k1_musig_keyagg_ca
 //! Compute the full aggregate pubkey from the given participant pubkeys in their current order
 std::optional<CPubKey> MuSig2AggregatePubkeys(const std::vector<CPubKey>& pubkeys);
 
-#endif // BITCOIN_MUSIG_H
+#endif // FlashCoin_MUSIG_H

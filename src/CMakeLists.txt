@@ -1,10 +1,10 @@
-# Copyright (c) 2023-present The Bitcoin Core developers
+# Copyright (c) 2023-present The FlashCoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or https://opensource.org/license/mit/.
 
 include(AddWindowsResources)
 
-configure_file(${PROJECT_SOURCE_DIR}/cmake/bitcoin-build-config.h.in bitcoin-build-config.h USE_SOURCE_PERMISSIONS @ONLY)
+configure_file(${PROJECT_SOURCE_DIR}/cmake/FlashCoin-build-config.h.in FlashCoin-build-config.h USE_SOURCE_PERMISSIONS @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 #=============================
@@ -38,19 +38,19 @@ if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
 endif()
 
 add_custom_target(generate_build_info
-  BYPRODUCTS ${PROJECT_BINARY_DIR}/src/bitcoin-build-info.h
-  COMMAND ${CMAKE_COMMAND} -DBUILD_INFO_HEADER_PATH=${PROJECT_BINARY_DIR}/src/bitcoin-build-info.h -DSOURCE_DIR=${PROJECT_SOURCE_DIR} -P ${PROJECT_SOURCE_DIR}/cmake/script/GenerateBuildInfo.cmake
-  COMMENT "Generating bitcoin-build-info.h"
+  BYPRODUCTS ${PROJECT_BINARY_DIR}/src/FlashCoin-build-info.h
+  COMMAND ${CMAKE_COMMAND} -DBUILD_INFO_HEADER_PATH=${PROJECT_BINARY_DIR}/src/FlashCoin-build-info.h -DSOURCE_DIR=${PROJECT_SOURCE_DIR} -P ${PROJECT_SOURCE_DIR}/cmake/script/GenerateBuildInfo.cmake
+  COMMENT "Generating FlashCoin-build-info.h"
   VERBATIM
 )
-add_library(bitcoin_clientversion STATIC EXCLUDE_FROM_ALL
+add_library(FlashCoin_clientversion STATIC EXCLUDE_FROM_ALL
   clientversion.cpp
 )
-target_link_libraries(bitcoin_clientversion
+target_link_libraries(FlashCoin_clientversion
   PRIVATE
     core_interface
 )
-add_dependencies(bitcoin_clientversion generate_build_info)
+add_dependencies(FlashCoin_clientversion generate_build_info)
 
 add_subdirectory(crypto)
 add_subdirectory(util)
@@ -58,7 +58,7 @@ if(ENABLE_IPC)
   add_subdirectory(ipc)
 endif()
 
-add_library(bitcoin_consensus STATIC EXCLUDE_FROM_ALL
+add_library(FlashCoin_consensus STATIC EXCLUDE_FROM_ALL
   arith_uint256.cpp
   consensus/merkle.cpp
   consensus/tx_check.cpp
@@ -71,10 +71,10 @@ add_library(bitcoin_consensus STATIC EXCLUDE_FROM_ALL
   script/script_error.cpp
   uint256.cpp
 )
-target_link_libraries(bitcoin_consensus
+target_link_libraries(FlashCoin_consensus
   PRIVATE
     core_interface
-    bitcoin_crypto
+    FlashCoin_crypto
     secp256k1
 )
 
@@ -83,8 +83,8 @@ if(WITH_ZMQ)
 endif()
 
 # Home for common functionality shared by different executables and libraries.
-# Similar to `bitcoin_util` library, but higher-level.
-add_library(bitcoin_common STATIC EXCLUDE_FROM_ALL
+# Similar to `FlashCoin_util` library, but higher-level.
+add_library(FlashCoin_common STATIC EXCLUDE_FROM_ALL
   addresstype.cpp
   base58.cpp
   bech32.cpp
@@ -137,11 +137,11 @@ add_library(bitcoin_common STATIC EXCLUDE_FROM_ALL
   script/signingprovider.cpp
   script/solver.cpp
 )
-target_link_libraries(bitcoin_common
+target_link_libraries(FlashCoin_common
   PRIVATE
     core_interface
-    bitcoin_consensus
-    bitcoin_util
+    FlashCoin_consensus
+    FlashCoin_util
     univalue
     secp256k1
     Boost::headers
@@ -155,27 +155,27 @@ if(ENABLE_WALLET)
   add_subdirectory(wallet)
 
   if(BUILD_WALLET_TOOL)
-    add_executable(bitcoin-wallet
-      bitcoin-wallet.cpp
-      init/bitcoin-wallet.cpp
+    add_executable(FlashCoin-wallet
+      FlashCoin-wallet.cpp
+      init/FlashCoin-wallet.cpp
       wallet/wallettool.cpp
     )
-    add_windows_resources(bitcoin-wallet bitcoin-wallet-res.rc)
-    add_windows_application_manifest(bitcoin-wallet)
-    target_link_libraries(bitcoin-wallet
+    add_windows_resources(FlashCoin-wallet FlashCoin-wallet-res.rc)
+    add_windows_application_manifest(FlashCoin-wallet)
+    target_link_libraries(FlashCoin-wallet
       core_interface
-      bitcoin_wallet
-      bitcoin_common
-      bitcoin_util
+      FlashCoin_wallet
+      FlashCoin_common
+      FlashCoin_util
       Boost::headers
     )
-    install_binary_component(bitcoin-wallet HAS_MANPAGE)
+    install_binary_component(FlashCoin-wallet HAS_MANPAGE)
   endif()
 endif()
 
 
-# P2P and RPC server functionality used by `bitcoind` and `bitcoin-qt` executables.
-add_library(bitcoin_node STATIC EXCLUDE_FROM_ALL
+# P2P and RPC server functionality used by `FlashCoind` and `FlashCoin-qt` executables.
+add_library(FlashCoin_node STATIC EXCLUDE_FROM_ALL
   addrdb.cpp
   addrman.cpp
   banman.cpp
@@ -268,15 +268,15 @@ add_library(bitcoin_node STATIC EXCLUDE_FROM_ALL
   validation.cpp
   validationinterface.cpp
   versionbits.cpp
-  $<$<TARGET_EXISTS:bitcoin_wallet>:wallet/init.cpp>
-  $<$<NOT:$<TARGET_EXISTS:bitcoin_wallet>>:dummywallet.cpp>
+  $<$<TARGET_EXISTS:FlashCoin_wallet>:wallet/init.cpp>
+  $<$<NOT:$<TARGET_EXISTS:FlashCoin_wallet>>:dummywallet.cpp>
 )
-target_link_libraries(bitcoin_node
+target_link_libraries(FlashCoin_node
   PRIVATE
     core_interface
-    bitcoin_common
-    bitcoin_util
-    $<TARGET_NAME_IF_EXISTS:bitcoin_zmq>
+    FlashCoin_common
+    FlashCoin_util
+    $<TARGET_NAME_IF_EXISTS:FlashCoin_zmq>
     leveldb
     minisketch
     univalue
@@ -287,113 +287,113 @@ target_link_libraries(bitcoin_node
     $<TARGET_NAME_IF_EXISTS:USDT::headers>
 )
 
-# Bitcoin wrapper executable that can call other executables.
-if(BUILD_BITCOIN_BIN)
-  add_executable(bitcoin bitcoin.cpp)
-  add_windows_resources(bitcoin bitcoin-res.rc)
-  add_windows_application_manifest(bitcoin)
-  target_link_libraries(bitcoin core_interface bitcoin_util)
-  install_binary_component(bitcoin HAS_MANPAGE)
+if(BUILD_FlashCoin_BIN)
+  # FlashCoin: por ahora no construimos el wrapper FlashCoin.exe
+  # add_executable(FlashCoin FlashCoin.cpp)
+  # add_windows_resources(FlashCoin FlashCoin-res.rc)
+  # add_windows_application_manifest(FlashCoin)
+  # target_link_libraries(FlashCoin core_interface FlashCoin_util)
+  # install_binary_component(FlashCoin HAS_MANPAGE)
 endif()
 
-# Bitcoin Core bitcoind.
+# FlashCoin FlashCoind.
 if(BUILD_DAEMON)
-  add_executable(bitcoind
-    bitcoind.cpp
-    init/bitcoind.cpp
+  add_executable(FlashCoind
+    FlashCoind.cpp
+    init/FlashCoind.cpp
   )
-  add_windows_resources(bitcoind bitcoind-res.rc)
-  add_windows_application_manifest(bitcoind)
-  target_link_libraries(bitcoind
+  add_windows_resources(FlashCoind FlashCoind-res.rc)
+  add_windows_application_manifest(FlashCoind)
+  target_link_libraries(FlashCoind
     core_interface
-    bitcoin_node
-    $<TARGET_NAME_IF_EXISTS:bitcoin_wallet>
+    FlashCoin_node
+    $<TARGET_NAME_IF_EXISTS:FlashCoin_wallet>
   )
-  install_binary_component(bitcoind HAS_MANPAGE)
+  install_binary_component(FlashCoind HAS_MANPAGE)
 endif()
 if(ENABLE_IPC AND BUILD_DAEMON)
-  add_executable(bitcoin-node
-    bitcoind.cpp
-    init/bitcoin-node.cpp
+  add_executable(FlashCoin-node
+    FlashCoind.cpp
+    init/FlashCoin-node.cpp
   )
-  target_link_libraries(bitcoin-node
+  target_link_libraries(FlashCoin-node
     core_interface
-    bitcoin_node
-    bitcoin_ipc
-    $<TARGET_NAME_IF_EXISTS:bitcoin_wallet>
+    FlashCoin_node
+    FlashCoin_ipc
+    $<TARGET_NAME_IF_EXISTS:FlashCoin_wallet>
   )
-  install_binary_component(bitcoin-node INTERNAL)
+  install_binary_component(FlashCoin-node INTERNAL)
 endif()
 
 if(ENABLE_IPC AND BUILD_TESTS)
-    # bitcoin_ipc_test library target is defined here in src/CMakeLists.txt
+    # FlashCoin_ipc_test library target is defined here in src/CMakeLists.txt
     # instead of src/test/CMakeLists.txt so capnp files in src/test/ are able to
     # reference capnp files in src/ipc/capnp/ by relative path. The Cap'n Proto
     # compiler only allows importing by relative path when the importing and
     # imported files are underneath the same compilation source prefix, so the
     # source prefix must be src/, not src/test/
-    add_library(bitcoin_ipc_test STATIC EXCLUDE_FROM_ALL
+    add_library(FlashCoin_ipc_test STATIC EXCLUDE_FROM_ALL
       test/ipc_test.cpp
     )
-    target_capnp_sources(bitcoin_ipc_test ${PROJECT_SOURCE_DIR}
+    target_capnp_sources(FlashCoin_ipc_test ${PROJECT_SOURCE_DIR}
       test/ipc_test.capnp
     )
-    add_dependencies(bitcoin_ipc_test bitcoin_ipc_headers)
+    add_dependencies(FlashCoin_ipc_test FlashCoin_ipc_headers)
 endif()
 
 
-add_library(bitcoin_cli STATIC EXCLUDE_FROM_ALL
+add_library(FlashCoin_cli STATIC EXCLUDE_FROM_ALL
   compat/stdin.cpp
   rpc/client.cpp
 )
-target_link_libraries(bitcoin_cli
+target_link_libraries(FlashCoin_cli
   PUBLIC
     core_interface
     univalue
 )
 
 
-# Bitcoin Core RPC client
+# FlashCoin RPC client
 if(BUILD_CLI)
-  add_executable(bitcoin-cli bitcoin-cli.cpp)
-  add_windows_resources(bitcoin-cli bitcoin-cli-res.rc)
-  add_windows_application_manifest(bitcoin-cli)
-  target_link_libraries(bitcoin-cli
+  add_executable(FlashCoin-cli FlashCoin-cli.cpp)
+  add_windows_resources(FlashCoin-cli FlashCoin-cli-res.rc)
+  add_windows_application_manifest(FlashCoin-cli)
+  target_link_libraries(FlashCoin-cli
     core_interface
-    bitcoin_cli
-    bitcoin_common
-    bitcoin_util
+    FlashCoin_cli
+    FlashCoin_common
+    FlashCoin_util
     libevent::core
     libevent::extra
   )
-  install_binary_component(bitcoin-cli HAS_MANPAGE)
+  install_binary_component(FlashCoin-cli HAS_MANPAGE)
 endif()
 
 
 if(BUILD_TX)
-  add_executable(bitcoin-tx bitcoin-tx.cpp)
-  add_windows_resources(bitcoin-tx bitcoin-tx-res.rc)
-  add_windows_application_manifest(bitcoin-tx)
-  target_link_libraries(bitcoin-tx
+  add_executable(FlashCoin-tx FlashCoin-tx.cpp)
+  add_windows_resources(FlashCoin-tx FlashCoin-tx-res.rc)
+  add_windows_application_manifest(FlashCoin-tx)
+  target_link_libraries(FlashCoin-tx
     core_interface
-    bitcoin_common
-    bitcoin_util
+    FlashCoin_common
+    FlashCoin_util
     univalue
   )
-  install_binary_component(bitcoin-tx HAS_MANPAGE)
+  install_binary_component(FlashCoin-tx HAS_MANPAGE)
 endif()
 
 
 if(BUILD_UTIL)
-  add_executable(bitcoin-util bitcoin-util.cpp)
-  add_windows_resources(bitcoin-util bitcoin-util-res.rc)
-  add_windows_application_manifest(bitcoin-util)
-  target_link_libraries(bitcoin-util
+  add_executable(FlashCoin-util FlashCoin-util.cpp)
+  add_windows_resources(FlashCoin-util FlashCoin-util-res.rc)
+  add_windows_application_manifest(FlashCoin-util)
+  target_link_libraries(FlashCoin-util
     core_interface
-    bitcoin_common
-    bitcoin_util
+    FlashCoin_common
+    FlashCoin_util
   )
-  install_binary_component(bitcoin-util HAS_MANPAGE)
+  install_binary_component(FlashCoin-util HAS_MANPAGE)
 endif()
 
 
@@ -407,24 +407,24 @@ if(BUILD_KERNEL_LIB)
 endif()
 
 if(BUILD_UTIL_CHAINSTATE)
-  add_executable(bitcoin-chainstate
-    bitcoin-chainstate.cpp
+  add_executable(FlashCoin-chainstate
+    FlashCoin-chainstate.cpp
   )
   # TODO: The `SKIP_BUILD_RPATH` property setting can be deleted
   #       in the future after reordering Guix script commands to
   #       perform binary checks after the installation step.
   # Relevant discussions:
-  # - https://github.com/hebasto/bitcoin/pull/236#issuecomment-2183120953
-  # - https://github.com/bitcoin/bitcoin/pull/30312#issuecomment-2191235833
-  set_target_properties(bitcoin-chainstate PROPERTIES
+  # - https://github.com/hebasto/FlashCoin/pull/236#issuecomment-2183120953
+  # - https://github.com/FlashCoin/FlashCoin/pull/30312#issuecomment-2191235833
+  set_target_properties(FlashCoin-chainstate PROPERTIES
     SKIP_BUILD_RPATH OFF
   )
-  target_link_libraries(bitcoin-chainstate
+  target_link_libraries(FlashCoin-chainstate
     PRIVATE
       core_interface
-      bitcoinkernel
+      FlashCoinkernel
   )
-  install_binary_component(bitcoin-chainstate INTERNAL)
+  install_binary_component(FlashCoin-chainstate INTERNAL)
 endif()
 
 

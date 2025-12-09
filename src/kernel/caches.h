@@ -1,9 +1,9 @@
-// Copyright (c) 2024-present The Bitcoin Core developers
+// Copyright (c) 2024-present The FlashCoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_KERNEL_CACHES_H
-#define BITCOIN_KERNEL_CACHES_H
+#ifndef FlashCoin_KERNEL_CACHES_H
+#define FlashCoin_KERNEL_CACHES_H
 
 #include <util/byte_units.h>
 
@@ -33,4 +33,4 @@ struct CacheSizes {
 };
 } // namespace kernel
 
-#endif // BITCOIN_KERNEL_CACHES_H
+#endif // FlashCoin_KERNEL_CACHES_H

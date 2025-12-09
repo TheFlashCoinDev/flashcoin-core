@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) The Bitcoin Core developers
+# Copyright (c) The FlashCoin developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or https://opensource.org/license/mit/.
 
 export LC_ALL=C
 
 # Fixes permission issues when there is a container UID/GID mismatch with the owner
-# of the mounted bitcoin src dir.
-git config --global --add safe.directory /bitcoin
+# of the mounted FlashCoin src dir.
+git config --global --add safe.directory /FlashCoin
 
 export PATH="/python_build/bin:${PATH}"
 

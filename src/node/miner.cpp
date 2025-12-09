@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2022 The Bitcoin Core developers
+// Copyright (c) 2009-2022 The FlashCoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,6 +26,7 @@
 #include <util/signalinterrupt.h>
 #include <util/time.h>
 #include <validation.h>
+#include <key_io.h> // DecodeDestination / GetScriptForDestination
 
 #include <algorithm>
 #include <utility>
@@ -156,19 +157,61 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock()
     m_last_block_num_txs = nBlockTx;
     m_last_block_weight = nBlockWeight;
 
-    // Create coinbase transaction.
+    // Create coinbase transaction. //
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
     coinbaseTx.vin[0].nSequence = CTxIn::MAX_SEQUENCE_NONFINAL; // Make sure timelock is enforced.
+
+    // Primero calculamos el subsidio y el total permitido por consenso
+    const CAmount blockReward = GetBlockSubsidy(nHeight, chainparams.GetConsensus()); // 5 FLASH, 2.5, etc
+    const CAmount totalReward = nFees + blockReward;
+
+    // Setup básico de la salida del minero
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = m_options.coinbase_output_script;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+    coinbaseTx.vout[0].nValue = totalReward; // por defecto: todo al minero
+
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     Assert(nHeight > 0);
     coinbaseTx.nLockTime = static_cast<uint32_t>(nHeight - 1);
+
+    // -------------------------------
+    // FlashCoin founder reward 10%:
+    //  - Minero: 90% del subsidio + 100% de las fees
+    //  - Dev:   10% del subsidio (no de las fees)
+    //  La suma total (minero + dev) SIEMPRE = totalReward, para no violar consenso.
+    //  Si algo falla (address inválida, etc.), se deja todo al minero.
+    // -------------------------------
+    {
+        if (blockReward > 0) {
+            const CAmount devReward = blockReward / 10; // 10% del subsidio
+
+            // Solo aplicamos si devReward tiene sentido
+            if (devReward > 0 && devReward < totalReward) {
+                const CAmount minerAmount = totalReward - devReward;
+
+                // Dev wallet (REGTEST) - la que tú pusiste
+                CTxDestination devDest = DecodeDestination("fl1qmugts6u2q8zaquwh8tanyrllkqtfrmwx9yqrrx");
+
+                if (IsValidDestination(devDest)) {
+                    // Ajustar salida del minero
+                    coinbaseTx.vout[0].nValue = minerAmount;
+
+                    // Añadir salida del dev
+                    const CScript devScript = GetScriptForDestination(devDest);
+                    coinbaseTx.vout.emplace_back(devReward, devScript);
+                } else {
+                    // Si por alguna razón la address no es válida, dejamos todo al minero
+                    coinbaseTx.vout[0].nValue = totalReward;
+                }
+            }
+        }
+        // Si blockReward == 0, o devReward no tiene sentido, no se hace nada: todo al minero.
+    }
+
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
-    pblocktemplate->vchCoinbaseCommitment = m_chainstate.m_chainman.GenerateCoinbaseCommitment(*pblock, pindexPrev);
+    pblocktemplate->vchCoinbaseCommitment = m_chainstate.m_chainman.GenerateCoinbaseCommitment(*pblock, pindexPrev); //
 
     LogPrintf("CreateNewBlock(): block weight: %u txs: %u fees: %ld sigops %d\n", GetBlockWeight(*pblock), nBlockTx, nFees, nBlockSigOpsCost);
 
