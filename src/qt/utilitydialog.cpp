@@ -35,24 +35,59 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, bool about) :
 
     QString version = QString{CLIENT_NAME} + " " + tr("version") + " " + QString::fromStdString(FormatFullVersion());
 
-    if (about)
+        if (about)
     {
         setWindowTitle(tr("About %1").arg(CLIENT_NAME));
 
+        // --- License info from core (same lógica de antes) ---
         std::string licenseInfo = LicenseInfo();
-        /// HTML-format the license message from the core
-        QString licenseInfoHTML = QString::fromStdString(LicenseInfo());
+        QString licenseInfoHTML = QString::fromStdString(licenseInfo);
+
         // Make URLs clickable
         QRegularExpression uri(QStringLiteral("<(.*)>"), QRegularExpression::InvertedGreedinessOption);
         licenseInfoHTML.replace(uri, QStringLiteral("<a href=\"\\1\">\\1</a>"));
         // Replace newlines with HTML breaks
         licenseInfoHTML.replace("\n", "<br>");
 
+        // --- Texto custom de FlashCoin en HTML ---
         ui->aboutMessage->setTextFormat(Qt::RichText);
-        ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        text = version + "\n" + QString::fromStdString(FormatParagraph(licenseInfo));
-        ui->aboutMessage->setText(version + "<br><br>" + licenseInfoHTML);
         ui->aboutMessage->setWordWrap(true);
+        ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+        QString aboutHtml = QString::fromUtf8(
+            "<b>%1</b><br>"
+            "<br>"
+            "Version: %2<br>"
+            "<br>"
+            "FlashCoin is an experimental, open-source digital currency focused on very fast "
+            "confirmations, using a target block time of <b>3 seconds</b>.<br>"
+            "<br>"
+            "Core parameters:<br>"
+            "&bull; Initial block reward: <b>5 FLASH</b><br>"
+            "&bull; Subsidy halving interval: <b>5,000,000 blocks</b><br>"
+            "<br>"
+            "This software is provided &quot;as is&quot;, without warranty of any kind. "
+            "By using FlashCoin Core you accept all risks related to running this software "
+            "and interacting with the FlashCoin network.<br>"
+            "<br>"
+            "<b>License</b><br>"
+        ).arg(QString{CLIENT_NAME},
+              QString::fromStdString(FormatFullVersion()));
+
+        ui->aboutMessage->setText(aboutHtml + licenseInfoHTML);
+
+        // Versión en texto plano para imprimir en consola
+        QString aboutPlain =
+            version + "\n\n"
+            "FlashCoin is an experimental, open-source digital currency focused on very fast "
+            "confirmations, with a target block time of 3 seconds.\n"
+            "\n"
+            "Core parameters:\n"
+            "  • Initial block reward: 5 FLASH\n"
+            "  • Subsidy halving interval: 5,000,000 blocks\n";
+
+        text = aboutPlain + "\n\n" + QString::fromStdString(FormatParagraph(licenseInfo));
+
         ui->helpMessage->setVisible(false);
     } else {
         setWindowTitle(tr("Command-line options"));
