@@ -1,79 +1,77 @@
-FlashCoin integration/staging tree
-=====================================
+# FlashCoin Core
 
-https://FlashCoincore.org
+**FlashCoin Core** is a non-profit, educational fork of Bitcoin Core designed to learn how a full cryptocurrency node and wallet work: consensus, networking, mining, wallet, RPC, and more.  
+It is **not** intended as an investment product.
 
-For an immediately usable, binary version of the FlashCoin software, see
-https://FlashCoincore.org/en/download/.
+---
 
-What is FlashCoin?
----------------------
+## 🧾 FlashCoin Specifications
 
-FlashCoin connects to the FlashCoin peer-to-peer network to download and fully
-validate blocks and transactions. It also includes a wallet and graphical user
-interface, which can be optionally built.
+> Current protocol parameters, as configured in the code.
 
-Further information about FlashCoin is available in the [doc folder](/doc).
+| Parameter                    | Value                              |
+|-----------------------------|------------------------------------|
+| Ticker                      | `FLASH`                            |
+| Consensus                   | Proof-of-Work (PoW)                |
+| PoW Algorithm               | SHA-256d                           |
+| Target block time           | **3 seconds**                      |
+| Block reward (initial)      | **5 FLASH**                        |
+| Halving interval            | **5,000,000 blocks**               |
+| Approx. halving period      | ~173 days (~5.7 months)           |
+| Maximum theoretical supply  | ~**50,000,000 FLASH**              |
+| Decimals                    | 8 (1 FLASH = 100,000,000 units)   |
+| MainNet P2P port            | `17554`                            |
+| TestNet P2P port            | `27554`                            |
+| TestNet4 P2P port           | `37554`                            |
+| Signet P2P port             | `47554`                            |
 
-License
--------
+**Supply note:** with 5 FLASH per block and halvings every 5,000,000 blocks, the total theoretical supply approaches ~50 million FLASH over infinite time (geometric halving series).
 
-FlashCoin is released under the terms of the MIT license. See [COPYING](COPYING) for more
-information or see https://opensource.org/license/MIT.
+FlashCoin inherits modern Bitcoin Core features (depending on upstream version), such as:
 
-Development Process
--------------------
+- SegWit and Taproot
+- Descriptor wallets and PSBT
+- Advanced RPC interface
+- Optional indexes, ZMQ notifications, and more
 
-The `master` branch is regularly built (see `doc/build-*.md` for instructions) and tested, but it is not guaranteed to be
-completely stable. [Tags](https://github.com/FlashCoin/FlashCoin/tags) are created
-regularly from release branches to indicate new official, stable release versions of FlashCoin.
+> ⚠️ FlashCoin is experimental. Parameters and behavior may change as part of learning and development.
 
-The https://github.com/FlashCoin-core/gui repository is used exclusively for the
-development of the GUI. Its master branch is identical in all monotree
-repositories. Release branches and tags do not exist, so please do not fork
-that repository unless it is for development reasons.
+---
 
-The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md)
-and useful hints for developers can be found in [doc/developer-notes.md](doc/developer-notes.md).
+## 🎯 Project Purpose
 
-Testing
--------
+FlashCoin Core is essentially **Bitcoin Core with different branding and parameters**, used as a lab to:
 
-Testing and code review is the bottleneck for development; we get more pull
-requests than we can review and test on short notice. Please be patient and help out by testing
-other people's pull requests, and remember this is a security-critical project where any mistake might cost people
-lots of money.
+- Rename binaries and resources (`FlashCoind`, `FlashCoin-qt`, icons, strings, etc.).
+- Adjust consensus parameters (block time, reward, halving, ports, etc.).
+- Understand how a real node validates blocks, handles mempool, and exposes RPC.
+- Experiment safely on regtest/test networks without touching real money.
 
-### Automated Testing
+**Primary goal:** education and experimentation.  
+**No financial promises.**
 
-Developers are strongly encouraged to write [unit tests](src/test/README.md) for new code, and to
-submit new unit tests for old code. Unit tests can be compiled and run
-(assuming they weren't disabled during the generation of the build system) with: `ctest`. Further details on running
-and extending unit tests can be found in [/src/test/README.md](/src/test/README.md).
+---
 
-There are also [regression and integration tests](/test), written
-in Python.
-These tests can be run (if the [test dependencies](/test) are installed) with: `build/test/functional/test_runner.py`
-(assuming `build` is your build directory).
+## 🧱 Main Components
 
-The CI (Continuous Integration) systems make sure that every pull request is tested on Windows, Linux, and macOS.
-The CI must pass on all commits before merge to avoid unrelated CI failures on new pull requests.
+After building, the main binaries are:
 
-### Manual Quality Assurance (QA) Testing
+- `FlashCoind` – full node daemon (no GUI).
+- `FlashCoin-qt` – GUI wallet + node using Qt.
+- `FlashCoin-cli` – command line interface for RPC.
+- `FlashCoin-tx` – low-level transaction tool.
+- Wallet utilities and tools (depending on build configuration).
 
-Changes should be tested by somebody other than the developer who wrote the
-code. This is especially important for large or high-risk changes. It is useful
-to add a test plan to the pull request description if testing the changes is
-not straightforward.
+File names, resources, and icons have been rebranded from Bitcoin Core to FlashCoin where applicable.
 
-Translations
-------------
+---
 
-Changes to translations as well as new translations can be submitted to
-[FlashCoin's Transifex page](https://explore.transifex.com/FlashCoin/FlashCoin/).
+## 🔧 Building FlashCoin Core (Linux example)
 
-Translations are periodically pulled from Transifex and merged into the git repository. See the
-[translation process](doc/translation_process.md) for details on how this works.
+Build steps are mostly identical to Bitcoin Core, just using this repository and the FlashCoin binary names.
 
-**Important**: We do not accept translation changes as GitHub pull requests because the next
-pull from Transifex would automatically overwrite them again.
+### Clone the repository
+
+```bash
+git clone https://github.com/TheFlashCoinDev/flashcoin-core.git
+cd flashcoin-core
