@@ -1,0 +1,7 @@
+Package: boost-move
+Version: 1.87.0
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-windows
+Multi-Arch: same
+Abi: b100635d432b85ea67ef77ea07f8fcaf1f2263754e9ff1ca85bb13dc90056b99
+Description: Boost move module

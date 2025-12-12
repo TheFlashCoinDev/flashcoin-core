@@ -2677,11 +2677,82 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
              Ticks<SecondsDouble>(m_chainman.time_connect),
              Ticks<MillisecondsDouble>(m_chainman.time_connect) / m_chainman.num_blocks_total);
 
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, params.GetConsensus());
-    if (block.vtx[0]->GetValueOut() > blockReward && state.IsValid()) {
-        state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
-                      strprintf("coinbase pays too much (actual=%d vs limit=%d)", block.vtx[0]->GetValueOut(), blockReward));
+    // ---------------------------------------------------------
+    // FlashCoin: regla básica de recompensa (igual que Bitcoin)
+    // ---------------------------------------------------------
+    const CAmount blockSubsidy = GetBlockSubsidy(pindex->nHeight, params.GetConsensus());
+    const CAmount blockReward  = nFees + blockSubsidy;
+
+    // La coinbase debe pagar EXACTAMENTE subsidio + fees.
+    // No se permite ni más (inflación) ni menos (quemar monedas por bug).
+    if (state.IsValid() && block.vtx[0]->GetValueOut() != blockReward) {
+        state.Invalid(
+            BlockValidationResult::BLOCK_CONSENSUS,
+            "bad-cb-amount",
+            strprintf("coinbase pays wrong amount (actual=%d vs expected=%d)",
+                      block.vtx[0]->GetValueOut(), blockReward));
     }
+
+    // ------------------------------------------------------------------
+    // FlashCoin: REGLA DE CONSENSO DEL DEV FEE (founder reward 10%)
+    //
+    //  - Subsidio base por bloque: GetBlockSubsidy(height)
+    //  - Dev fee = 10% del subsidio (NO incluye las fees)
+    //  - La coinbase DEBE tener al menos una salida:
+    //        -> scriptPubKey == devScript (wallet hardcodeada)
+    //        -> monto TOTAL a esa dirección == devReward exacto
+    //
+    //  Si un minero/pool intenta quedarse con el 100% (sin dev fee),
+    //  el bloque se marca inválido y se rechaza.
+    // ------------------------------------------------------------------
+    if (state.IsValid() && pindex->nHeight > 0) {
+        if (blockSubsidy > 0) {
+            const CAmount devReward = blockSubsidy / 10;
+
+            if (devReward > 0 && devReward <= blockReward) {
+                // MISMA dirección que en miner.cpp
+                const std::string devAddress = "fl1q2uapupfnguw4tlvn75w0hh4enr6g3xjgrl7mum";
+
+                CTxDestination devDest = DecodeDestination(devAddress);
+                if (!IsValidDestination(devDest)) {
+                    return state.Invalid(
+                        BlockValidationResult::BLOCK_CONSENSUS,
+                        "bad-fndr-addr",
+                        "FlashCoin founder reward destination is invalid at runtime");
+                }
+
+                const CScript devScript = GetScriptForDestination(devDest);
+
+                bool   foundDevOutput = false;
+                CAmount devTotal      = 0;
+
+                const CTransaction& coinbaseTx = *(block.vtx[0]);
+                for (const CTxOut& out : coinbaseTx.vout) {
+                    if (out.scriptPubKey == devScript) {
+                        foundDevOutput = true;
+                        devTotal += out.nValue;
+                    }
+                }
+
+                if (!foundDevOutput) {
+                    return state.Invalid(
+                        BlockValidationResult::BLOCK_CONSENSUS,
+                        "bad-fndr-missing",
+                        "coinbase missing FlashCoin founder reward output");
+                }
+
+                if (devTotal != devReward) {
+                    return state.Invalid(
+                        BlockValidationResult::BLOCK_CONSENSUS,
+                        "bad-fndr-amount",
+                        strprintf("founder reward amount mismatch (actual=%d vs expected=%d)",
+                                  devTotal, devReward));
+                }
+            }
+        }
+    }
+    // ----------------------------------------------------------
+
     if (control) {
         auto parallel_result = control->Complete();
         if (parallel_result.has_value() && state.IsValid()) {

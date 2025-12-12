@@ -20,7 +20,7 @@ using util::Join;
  * for both FlashCoind and FlashCoin-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string UA_NAME("Satoshi");
+const std::string UA_NAME("lightnings");
 
 
 #include <FlashCoin-build-info.h>
@@ -83,9 +83,9 @@ std::string CopyrightHolders(const std::string& strPrefix)
 
 std::string LicenseInfo()
 {
-    const std::string URL_SOURCE_CODE = "<https://github.com/FlashCoin/FlashCoin>";
+    const std::string URL_SOURCE_CODE = "<https://github.com/TheFlashCoinDev/flashcoin-core>";
 
-    return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2009, COPYRIGHT_YEAR).translated + " ") + "\n" +
+    return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2025, COPYRIGHT_YEAR).translated + " ") + "\n" +
            "\n" +
            strprintf(_("Please contribute if you find %s useful. "
                        "Visit %s for further information about the software."),

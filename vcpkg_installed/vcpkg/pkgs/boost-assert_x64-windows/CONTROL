@@ -1,0 +1,7 @@
+Package: boost-assert
+Version: 1.87.0
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-windows
+Multi-Arch: same
+Abi: cdf4347f27a2c4f32844233902bedec8b915440ee93caffc5db385de26e066f2
+Description: Boost assert module

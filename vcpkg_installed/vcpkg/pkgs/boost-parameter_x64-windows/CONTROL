@@ -1,0 +1,7 @@
+Package: boost-parameter
+Version: 1.87.0
+Depends: boost-cmake, boost-config, boost-core, boost-function, boost-fusion, boost-headers, boost-mp11, boost-mpl, boost-optional, boost-preprocessor, boost-type-traits, boost-utility
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 952369b8b90db9a9d1aa16efb68684355ae529c6573fa153e565c0c12e03a1c1
+Description: Boost parameter module

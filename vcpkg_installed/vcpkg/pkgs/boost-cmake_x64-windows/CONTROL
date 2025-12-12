@@ -1,0 +1,7 @@
+Package: boost-cmake
+Version: 1.87.0
+Depends: boost-uninstall, vcpkg-boost, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: e47c46cd299aa8b9a0090c6db3511620efe1ca3dd1bf2a99d15eb1dec760fd87
+Description: Boost CMake support infrastructure

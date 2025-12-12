@@ -1,0 +1,20 @@
+Package: qttools
+Version: 6.8.2
+Depends: qtbase
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 30861026c3bc3baf0d73da47225b71af69e5f63963e79e6169014e88bc6b51d0
+Description: A collection of tools and utilities that come with the Qt framework to assist developers in the creation, management, and deployment of Qt applications.
+
+Package: qttools
+Feature: designer
+Depends: qtbase
+Architecture: x64-windows
+Multi-Arch: same
+Description: Build Qt Designer
+
+Package: qttools
+Feature: linguist
+Architecture: x64-windows
+Multi-Arch: same
+Description: Build Qt Linguist components

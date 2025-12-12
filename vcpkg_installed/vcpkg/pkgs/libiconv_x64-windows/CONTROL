@@ -1,0 +1,6 @@
+Package: libiconv
+Version: 1.18
+Architecture: x64-windows
+Multi-Arch: same
+Abi: afb7d3126fe78d9d6fede58a747d9662f38d716d20a7c50668002c96998b93d0
+Description: GNU Unicode text conversion

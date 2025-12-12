@@ -164,8 +164,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock()
     coinbaseTx.vin[0].nSequence = CTxIn::MAX_SEQUENCE_NONFINAL; // Make sure timelock is enforced.
 
     // Primero calculamos el subsidio y el total permitido por consenso
-    const CAmount blockReward = GetBlockSubsidy(nHeight, chainparams.GetConsensus()); // 5 FLASH, 2.5, etc
-    const CAmount totalReward = nFees + blockReward;
+    const CAmount blockSubsidy = GetBlockSubsidy(nHeight, chainparams.GetConsensus()); // 5 FLASH, 2.5, etc.
+    const CAmount totalReward = nFees + blockSubsidy;
 
     // Setup básico de la salida del minero
     coinbaseTx.vout.resize(1);
@@ -176,39 +176,70 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock()
     Assert(nHeight > 0);
     coinbaseTx.nLockTime = static_cast<uint32_t>(nHeight - 1);
 
-    // -------------------------------
-    // FlashCoin founder reward 10%:
+    // ---------------------------------------------------------
+    // FlashCoin: Founder reward 10% del SUBSIDIO (no fees)
+    //
     //  - Minero: 90% del subsidio + 100% de las fees
-    //  - Dev:   10% del subsidio (no de las fees)
-    //  La suma total (minero + dev) SIEMPRE = totalReward, para no violar consenso.
-    //  Si algo falla (address inválida, etc.), se deja todo al minero.
-    // -------------------------------
+    //  - Dev:    10% del subsidio (fijo, hardcode)
+    //
+    //  Si algo falla (address inválida, monto raro, etc.),
+    //  dejamos todo al minero (no rompemos consenso).
+    // ---------------------------------------------------------
     {
-        if (blockReward > 0) {
-            const CAmount devReward = blockReward / 10; // 10% del subsidio
+        if (blockSubsidy > 0) {
+
+            const CAmount devReward = blockSubsidy / 10; // 10% del subsidio
 
             // Solo aplicamos si devReward tiene sentido
             if (devReward > 0 && devReward < totalReward) {
-                const CAmount minerAmount = totalReward - devReward;
 
-                // Dev wallet (REGTEST) - la que tú pusiste
-                CTxDestination devDest = DecodeDestination("fl1qmugts6u2q8zaquwh8tanyrllkqtfrmwx9yqrrx");
+                // Buscar el output del minero:
+                // primer vout con valor > 0 y que no sea OP_RETURN / unspendable
+                int minerIndex = -1;
+                for (size_t i = 0; i < coinbaseTx.vout.size(); ++i) {
+                    const CTxOut& out = coinbaseTx.vout[i];
+                    if (!out.scriptPubKey.IsUnspendable() && out.nValue > 0) {
+                        minerIndex = static_cast<int>(i);
+                        break;
+                    }
+                }
 
-                if (IsValidDestination(devDest)) {
-                    // Ajustar salida del minero
-                    coinbaseTx.vout[0].nValue = minerAmount;
+                if (minerIndex >= 0) {
+                    // Dev wallet hardcodeada
+                    const std::string devAddress = "fl1q2uapupfnguw4tlvn75w0hh4enr6g3xjgrl7mum";
+                    CTxDestination devDest = DecodeDestination(devAddress);
 
-                    // Añadir salida del dev
-                    const CScript devScript = GetScriptForDestination(devDest);
-                    coinbaseTx.vout.emplace_back(devReward, devScript);
+                    if (IsValidDestination(devDest)) {
+                        const CAmount minerOld = coinbaseTx.vout[minerIndex].nValue;
+                        const CAmount minerAmount = minerOld - devReward;
+
+                        if (minerAmount > 0) {
+                            // Ajustar salida del minero
+                            coinbaseTx.vout[minerIndex].nValue = minerAmount;
+
+                            // Añadir salida del dev
+                            const CScript devScript = GetScriptForDestination(devDest);
+                            coinbaseTx.vout.emplace_back(devReward, devScript);
+
+                            LogPrintf(
+                                "FOUNDER-DEBUG: height=%d subsidy=%lld fees=%lld minerIndex=%d minerOld=%lld minerAmount=%lld devReward=%lld\n",
+                                nHeight, blockSubsidy, nFees, minerIndex, minerOld, minerAmount, devReward);
+                        } else {
+                            LogPrintf(
+                                "FOUNDER-DEBUG: minerAmount <= 0 en height=%d (minerOld=%lld, devReward=%lld)\n",
+                                nHeight, minerOld, devReward);
+                        }
+                    } else {
+                        LogPrintf("FOUNDER-DEBUG: INVALID dev address en height=%d\n", nHeight);
+                    }
                 } else {
-                    // Si por alguna razón la address no es válida, dejamos todo al minero
-                    coinbaseTx.vout[0].nValue = totalReward;
+                    LogPrintf("FOUNDER-DEBUG: NO miner output encontrado en coinbase en height=%d\n", nHeight);
                 }
             }
         }
-        // Si blockReward == 0, o devReward no tiene sentido, no se hace nada: todo al minero.
+        // Si blockSubsidy == 0, o devReward no tiene sentido, no se hace nada: todo al minero.
     }
+
 
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = m_chainstate.m_chainman.GenerateCoinbaseCommitment(*pblock, pindexPrev); //

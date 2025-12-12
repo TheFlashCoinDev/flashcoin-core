@@ -1,0 +1,7 @@
+Package: boost-type-index
+Version: 1.87.0
+Depends: boost-cmake, boost-config, boost-container-hash, boost-core, boost-headers, boost-throw-exception
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 27ef3cdcaa8f7d1cb434c27716d2b1979b2f48e12d8659ab4ea0d4e3d1274b7d
+Description: Boost type_index module

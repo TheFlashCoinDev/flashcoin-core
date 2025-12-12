@@ -1,0 +1,61 @@
+Package: qtbase
+Version: 6.8.2
+Port-Version: 1
+Depends: pcre2, vcpkg-cmake, vcpkg-cmake-config, zlib
+Architecture: x64-windows
+Multi-Arch: same
+Abi: fcbaaf3694fdefcf70b37abadc8875c0be5c3b64d8f62982fa5d9e53b4bd7f10
+Description: Qt Base (Core, Gui, Widgets, Network, ...)
+Default-Features: brotli, concurrent, dbus, dnslookup, doubleconversion, freetype, gui, harfbuzz, icu, jpeg, network, opengl, openssl, pcre2, png, sql, sql-psql, sql-sqlite, testlib, thread, widgets, zstd
+
+Package: qtbase
+Feature: doubleconversion
+Depends: double-conversion
+Architecture: x64-windows
+Multi-Arch: same
+Description: Enable double conversion support
+
+Package: qtbase
+Feature: freetype
+Depends: freetype
+Architecture: x64-windows
+Multi-Arch: same
+Description: Supports the FreeType 2 font engine (and its supported font formats).
+
+Package: qtbase
+Feature: gui
+Depends: opengl
+Architecture: x64-windows
+Multi-Arch: same
+Description: Qt Gui
+
+Package: qtbase
+Feature: network
+Architecture: x64-windows
+Multi-Arch: same
+Description: Qt Network
+
+Package: qtbase
+Feature: png
+Depends: libpng
+Architecture: x64-windows
+Multi-Arch: same
+Description: Enable PNG
+
+Package: qtbase
+Feature: testlib
+Architecture: x64-windows
+Multi-Arch: same
+Description: Qt Testlib
+
+Package: qtbase
+Feature: thread
+Architecture: x64-windows
+Multi-Arch: same
+Description: Thread support; provides QThread and related classes.
+
+Package: qtbase
+Feature: widgets
+Architecture: x64-windows
+Multi-Arch: same
+Description: Qt Widgets
